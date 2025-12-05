@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Locating1_0936x</string>
+    <string name="access_granted">Доступ разрешен</string>
+    <string name="access_denied">Доступ запрещен</string>
+    <string name="lat">Широта: %1$s</string>
+    <string name="lon">Долгота: %1$s</string>
+</resources>
