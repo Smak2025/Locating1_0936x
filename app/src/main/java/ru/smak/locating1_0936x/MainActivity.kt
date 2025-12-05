@@ -97,7 +97,7 @@ fun Greeting(isGranted: Boolean, modifier: Modifier = Modifier) {
     Text(
         text = if (isGranted) stringResource(R.string.access_granted) else stringResource(R.string.access_denied),
         modifier = modifier,
-        fontSize = 48.sp
+        fontSize = 20.sp
     )
 }
 
