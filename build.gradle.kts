@@ -1,5 +1,4 @@
 import java.io.FileInputStream
-import java.io.InputStream
 import java.util.Properties
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
@@ -16,9 +15,5 @@ val localProperties = Properties().apply {
     }
 }
 
-val mapkitApiKey = localProperties.getProperty("MAPKIT_API_KEY")?.takeIf { it.isNotBlank() }
-    ?: error("MAPKIT_API_KEY не найден в local.properties! " +
-            "Добавьте ключ в файл local.properties в корне проекта")
-
-// Сохраняем ключ для использования в модулях
+val mapkitApiKey = localProperties.getProperty("MAPKIT_API_KEY")?.takeIf { it.isNotBlank() } ?: ""
 rootProject.extra["mapkitApiKey"] = mapkitApiKey
