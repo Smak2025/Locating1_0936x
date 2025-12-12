@@ -24,6 +24,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import com.yandex.mapkit.MapKitFactory
+import com.yandex.mapkit.mapview.MapView
 import ru.smak.locating1_0936x.ui.theme.Locating1_0936xTheme
 
 class MainActivity : ComponentActivity() {
@@ -54,6 +57,10 @@ class MainActivity : ComponentActivity() {
             )
         )
         super.onCreate(savedInstanceState)
+
+        MapKitFactory.setApiKey(BuildConfig.MAPKIT_API_KEY)
+        MapKitFactory.initialize(this)
+
         enableEdgeToEdge()
         setContent {
             Locating1_0936xTheme {
@@ -62,33 +69,46 @@ class MainActivity : ComponentActivity() {
                         Greeting(
                             isGranted = viewModel.permissionGranted,
                         )
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(8.dp)
-                        ) {
-                            items(viewModel.locationList) {
-                                Card(
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Column(
-                                        Modifier.fillMaxWidth().padding(8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                                    ) {
-                                        Text(
-                                            stringResource(R.string.lat, it.latitude),
-                                        )
-                                        Text(
-                                            stringResource(R.string.lon, it.longitude),
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        AndroidView(factory = { context ->
+                            MapView(context)
+                        }, modifier = Modifier.fillMaxSize())
+//                        LazyColumn(
+//                            modifier = Modifier
+//                                .fillMaxSize()
+//                                .padding(8.dp)
+//                        ) {
+//                            items(viewModel.locationList) {
+//                                Card(
+//                                    modifier = Modifier.fillMaxWidth()
+//                                ) {
+//                                    Column(
+//                                        Modifier.fillMaxWidth().padding(8.dp),
+//                                        verticalArrangement = Arrangement.spacedBy(16.dp)
+//                                    ) {
+//                                        Text(
+//                                            stringResource(R.string.lat, it.latitude),
+//                                        )
+//                                        Text(
+//                                            stringResource(R.string.lon, it.longitude),
+//                                        )
+//                                    }
+//                                }
+//                            }
+//                        }
                     }
                 }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        MapKitFactory.getInstance().onStart()
+    }
+
+    override fun onStop() {
+        MapKitFactory.getInstance().onStop()
+        super.onStop()
     }
 }
 
