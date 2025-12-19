@@ -1,6 +1,7 @@
 package ru.smak.locating1_0936x
 
 import android.Manifest
+import android.location.Location
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -8,25 +9,30 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.yandex.mapkit.MapKitFactory
+import com.yandex.mapkit.geometry.Circle
+import com.yandex.mapkit.geometry.Geometry
+import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.geometry.Polyline
+import com.yandex.mapkit.map.CameraPosition
+import com.yandex.mapkit.map.LineStyle
 import com.yandex.mapkit.mapview.MapView
+import com.yandex.runtime.image.ImageProvider
 import ru.smak.locating1_0936x.ui.theme.Locating1_0936xTheme
 
 class MainActivity : ComponentActivity() {
@@ -69,9 +75,10 @@ class MainActivity : ComponentActivity() {
                         Greeting(
                             isGranted = viewModel.permissionGranted,
                         )
-                        AndroidView(factory = { context ->
-                            MapView(context)
-                        }, modifier = Modifier.fillMaxSize())
+                        Map(
+                            viewModel.locationList,
+                            modifier = Modifier.fillMaxSize(),
+                        )
 //                        LazyColumn(
 //                            modifier = Modifier
 //                                .fillMaxSize()
@@ -127,4 +134,70 @@ fun GreetingPreview() {
     Locating1_0936xTheme {
         Greeting(false)
     }
+}
+
+@Composable
+fun Map(
+    locationList: List<Location>,
+    modifier: Modifier = Modifier,
+){
+    fun moveToCurrentPosition(map: com.yandex.mapkit.map.Map){
+        locationList.lastOrNull()?.let { currentLocation ->
+            val currentPoint = Point(
+                currentLocation.latitude,
+                currentLocation.longitude
+            )
+            map.move(
+                CameraPosition(
+                    currentPoint,
+                    17.0f,
+                    0.0f,
+                    45f
+                )
+            )
+        }
+    }
+
+    fun createPolyLine() = Polyline(
+        locationList.map { Point(it.latitude, it.longitude) }
+    )
+
+    AndroidView(
+        factory = { context ->
+            MapView(context).also{ view ->
+                view.mapWindow.map.apply {
+                    moveToCurrentPosition(this)
+                }
+            }
+        },
+        update = { view ->
+            val line = createPolyLine()
+            view.mapWindow.map.apply {
+                moveToCurrentPosition(this)
+                mapObjects.clear()
+                mapObjects.addPolyline(line).apply {
+                    style = LineStyle(
+                        7f,
+                        0f,
+                        Color.Red.toArgb(),
+                        5f,
+                        false,
+                        5f,
+                        0f,
+                        0f,
+                        5f,
+                        0f
+                    )
+                    setStrokeColor(Color.Green.toArgb())
+                }
+                mapObjects.addPlacemark { obj ->
+                    line.points.lastOrNull()?.let {
+                        obj.geometry = it
+                        obj.setText("Текущее положение")
+                        obj.setIcon(ImageProvider.fromResource(view.context, R.drawable.outline_add_location_24, false))
+                    }
+                }
+            }
+        },
+        modifier = modifier)
 }

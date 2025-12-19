@@ -34,7 +34,7 @@ object Locator : LocationListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 getLastKnownLocation(LocationManager.FUSED_PROVIDER)
                 requestLocationUpdates(
-                    LocationManager.FUSED_PROVIDER,
+                    LocationManager.GPS_PROVIDER,
                     5000,
                     10f,
                     Locator
